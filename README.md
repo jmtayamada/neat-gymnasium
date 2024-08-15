@@ -7,7 +7,7 @@
 ## About
 
 This repository contains code allowing you to train, test, and visualize
-[OpenAI Gym](https://gym.openai.com/) environments (games) using the
+[Gymnasium]([https://gym.openai.com/](https://gymnasium.farama.org)) environments (games) using the
 [NEAT](https://www.cse.unr.edu/~sushil/class/gas/papers/NEAT.pdf) algorithm
 and its variants.
 
