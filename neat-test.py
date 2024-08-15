@@ -7,7 +7,7 @@ Copyright (C) 2020 Simon D. Levy
 MIT License
 '''
 
-import gym
+import gymnasium as gym
 from neat_gym import read_file, eval_net
 
 # Load genome and configuration from pickled file
@@ -16,7 +16,7 @@ net, env_name, record_dir, seed, nodisplay, csvfilename = \
 
 # Run the network on the environment
 eval_net(net,
-         gym.make(env_name),
+         gym.make(env_name, render_mode = "human"),
          render=(not nodisplay),
          record_dir=record_dir,
          seed=seed,

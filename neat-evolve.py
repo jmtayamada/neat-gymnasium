@@ -7,6 +7,8 @@ Copyright (C) 2020 Simon D. Levy
 MIT License
 '''
 
+import gymnasium as gym
+
 from time import time
 import os
 import argparse
@@ -156,7 +158,7 @@ class _GymNeatConfig(object):
         self.max_episode_steps = env.spec.max_episode_steps
 
         # Store environment for later
-        self.env = env
+        self.env: gym.Env = env
 
         # Track evaluations
         self.current_evaluations = 0
@@ -221,9 +223,9 @@ class _GymNeatConfig(object):
 
     def eval_net_novelty(self, net, genome):
 
-        env = self.env
-        env.seed(self.seed)
-        state = env.reset()
+        env: gym.Env = self.env
+        # env.seed(self.seed)
+        state, _ = env.reset()
         steps = 0
 
         is_discrete = _is_discrete(env)
@@ -241,14 +243,14 @@ class _GymNeatConfig(object):
                       if is_discrete
                       else action * env.action_space.high)
 
-            state, reward, done, info = env.step(action)
+            state, reward, terminated, truncated, info = env.step(action)
 
             behavior = info['behavior']
 
             # Accumulate reward, but not novelty
             total_reward += reward
 
-            if done:
+            if terminated or truncated:
                 break
 
             steps += 1

@@ -10,8 +10,8 @@ import argparse
 import pickle
 import time
 
-import gym
-from gym import wrappers
+import gymnasium as gym
+from gymnasium import wrappers
 import numpy as np
 
 
@@ -80,7 +80,7 @@ def read_file(allow_record=False, allow_seed=False):
 
 def eval_net(
         net,
-        env,
+        env: gym.Env,
         render=False,
         report=False,
         record_dir=None,
@@ -103,8 +103,8 @@ def eval_net(
     if record_dir is not None:
         env = wrappers.Monitor(env, record_dir, force=True)
 
-    env.seed(seed)
-    state = env.reset()
+    # env.seed(seed)
+    state, _ = env.reset()
     total_reward = 0
     steps = 0
 
@@ -126,7 +126,7 @@ def eval_net(
         action = (np.argmax(action)
                   if is_discrete else action * env.action_space.high)
 
-        state, reward, done, _ = env.step(action)
+        state, reward, terminated, truncated, _ = env.step(action)
 
         if csvfile is not None:
 
@@ -146,7 +146,7 @@ def eval_net(
 
         total_reward += reward
 
-        if done:
+        if terminated or truncated:
             break
 
         steps += 1
