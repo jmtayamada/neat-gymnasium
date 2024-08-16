@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-NEAT evolver script for OpenAI Gym environemnts
+NEAT evolver script for OpenAI Gym environments
 
 Copyright (C) 2020 Simon D. Levy
 
@@ -61,6 +61,9 @@ class _GymNeatConfig(object):
         self.reproduction_type = neat.DefaultReproduction
         self.species_set_type = neat.DefaultSpeciesSet
         self.stagnation_type = neat.DefaultStagnation
+        
+        self.greyscale = False
+        self.rendType = "simple"
 
         parameters = ConfigParser()
         with open(args.configfile) as f:
@@ -74,7 +77,18 @@ class _GymNeatConfig(object):
             try:
                 names = parameters['Names']
                 for idx, name in enumerate(eval(names['input'])):
-                    self.node_names[-idx-1] = name
+                    if name == "GREYSCALE":
+                        self.greyscale = True
+                        continue
+                    if self.rendType == "screen":
+                        for i in range(int(name)):
+                            self.node_names[-i-1] = "pixel"
+                        break
+                    if name == "SCREENINPUT":
+                        self.rendType = "screen"
+                    if self.rendType == "simple":
+                        self.node_names[-idx-1] = name
+                    
                 for idx, name in enumerate(eval(names['output'])):
                     self.node_names[idx] = name
             except Exception:
@@ -104,11 +118,20 @@ class _GymNeatConfig(object):
         self.reps = int(gympar['episode_reps'])
 
         # Make gym environment form name in command-line arguments
-        env = _gym_make(env_name)
+        env: gym.Env = _gym_make(env_name)
 
         # Get input/output layout from environment, or from layout for Hyper
         if layout is None:
-            num_inputs = env.observation_space.shape[0]
+            num_inputs = 1
+            if self.rendType == "simple":
+                num_inputs = env.observation_space.shape[0]
+            elif self.rendType == "screen":
+                if self.greyscale:
+                    for i in range(len(env.observation_space.shape) - 1):
+                        num_inputs = num_inputs * env.observation_space.shape[i]
+                else:
+                    for i in range(len(env.observation_space.shape)):
+                        num_inputs = num_inputs * env.observation_space.shape[i]
             if _is_discrete(env):
                 num_outputs = env.action_space.n
             else:
@@ -177,13 +200,13 @@ class _GymNeatConfig(object):
         # Default to non-recurrent net
         self.activations = 1
 
-    def eval_net_mean(self, net, genome):
+    def eval_net_mean(self, net: FeedForwardNetwork, genome):
 
         return (self.eval_net_mean_novelty(net, genome)
                 if self.is_novelty()
                 else self.eval_net_mean_reward(net, genome))
 
-    def eval_net_mean_reward(self, net, genome):
+    def eval_net_mean_reward(self, net: FeedForwardNetwork, genome):
 
         reward_sum = 0
         total_steps = 0
@@ -194,14 +217,16 @@ class _GymNeatConfig(object):
                                      self.env,
                                      activations=self.activations,
                                      seed=self.seed,
-                                     max_episode_steps=self.max_episode_steps)
+                                     max_episode_steps=self.max_episode_steps,
+                                     greyscale = self.greyscale,
+                                     rendType = self.rendType)
 
             reward_sum += reward
             total_steps += steps
 
         return reward_sum/self.reps, total_steps
 
-    def eval_net_mean_novelty(self, net, genome):
+    def eval_net_mean_novelty(self, net: FeedForwardNetwork, genome):
 
         reward_sum = 0
         total_steps = 0
@@ -221,11 +246,14 @@ class _GymNeatConfig(object):
 
         return reward_sum/self.reps, behaviors, total_steps
 
-    def eval_net_novelty(self, net, genome):
+    def eval_net_novelty(self, net: FeedForwardNetwork, genome):
 
         env: gym.Env = self.env
         # env.seed(self.seed)
         state, _ = env.reset()
+        if self.greyscale:
+            state = state[:, :, 0]
+        state = state.flatten()
         steps = 0
 
         is_discrete = _is_discrete(env)
@@ -244,6 +272,9 @@ class _GymNeatConfig(object):
                       else action * env.action_space.high)
 
             state, reward, terminated, truncated, info = env.step(action)
+            if self.greyscale:
+                state = state[:, :, 0]
+            state = state.flatten()
 
             behavior = info['behavior']
 
@@ -291,7 +322,7 @@ class _GymNeatConfig(object):
         exit(1)
 
     @staticmethod
-    def draw_net(net, filename, node_names):
+    def draw_net(net: FeedForwardNetwork, filename, node_names):
 
         # Create PDF using PUREPLES function
         draw_net(net, filename=filename, node_names=node_names)
@@ -374,7 +405,7 @@ class _GymHyperConfig(_GymNeatConfig):
         cppn, net = self.make_nets(genome)
         self.save_nets(genome, cppn, net)
 
-    def save_nets(self, genome, cppn, net, suffix='-hyper'):
+    def save_nets(self, genome, cppn, net: FeedForwardNetwork, suffix='-hyper'):
         pickle.dump((net, self.env_name),
                     open('models/%s.dat' %
                          self.make_name(genome, suffix=suffix), 'wb'))
@@ -422,7 +453,7 @@ class _GymEsHyperConfig(_GymHyperConfig):
                 }
 
     def save_genome(self, genome):
-
+        
         cppn, _, net = self.make_nets(genome)
         self.save_nets(genome, cppn, net, suffix='-eshyper')
 

@@ -6,7 +6,7 @@
 
 ## About
 
-This repository contains code allowing you to train, test, and visualize
+This repository is a fork of https://github.com/simondlevy/neat-gym containing code allowing you to train, test, and visualize
 [Gymnasium]([https://gym.openai.com/](https://gymnasium.farama.org)) environments (games) using the
 [NEAT](https://www.cse.unr.edu/~sushil/class/gas/papers/NEAT.pdf) algorithm
 and its variants.
@@ -42,6 +42,22 @@ The ```visuals``` folder will contain a PDF showing the corresponding model,
 and the ```runs``` folder will contain a CSV file with the history of the 
 fitnesses (mean, standard deviation, max).  To visualize this history you
 can run the ```neat-plot.py``` script on this CSV file.
+
+## Running Gymnasium-Atari Games
+
+To train spaceinvaders-RGB (https://gymnasium.farama.org/environments/atari/space_invaders/), run
+
+```
+% python3 neat-evolve.py models/spaceinvadersRGB
+```
+
+To train spaceinvaders-RAM, run
+
+```
+% python3 neat-evolve.py models/spaceinvadersRAM
+```
+
+Info on how to set up the config files for atari games can be found in the README located in the config folder
 
 ## HyperNEAT and ES-HyperNEAT
 

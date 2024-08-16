@@ -14,6 +14,8 @@ import gymnasium as gym
 from gymnasium import wrappers
 import numpy as np
 
+from neat.nn import FeedForwardNetwork
+
 
 def _gym_make(envname):
 
@@ -79,7 +81,7 @@ def read_file(allow_record=False, allow_seed=False):
 
 
 def eval_net(
-        net,
+        net: FeedForwardNetwork,
         env: gym.Env,
         render=False,
         report=False,
@@ -87,7 +89,8 @@ def eval_net(
         activations=1,
         seed=None,
         max_episode_steps=None,
-        csvfilename=None):
+        csvfilename=None,
+        **kwargs):
     '''
     Evaluates a network
     @param net the network
@@ -99,12 +102,22 @@ def eval_net(
     @param csvfilename name of CSV file for saving trajectory
     @return total reward
     '''
+    
+    greyscale: bool = False
+    for key, value in kwargs.items():
+        if key == 'greyscale':
+            greyscale = value
+        if key == 'rendType':
+            rendType = value
 
     if record_dir is not None:
         env = wrappers.Monitor(env, record_dir, force=True)
 
     # env.seed(seed)
     state, _ = env.reset()
+    if greyscale:
+        state = state[:, :, 0]
+    state = state.flatten()
     total_reward = 0
     steps = 0
 
@@ -127,6 +140,9 @@ def eval_net(
                   if is_discrete else action * env.action_space.high)
 
         state, reward, terminated, truncated, _ = env.step(action)
+        if greyscale:
+            state = state[:, :, 0]
+        state = state.flatten()
 
         if csvfile is not None:
 
