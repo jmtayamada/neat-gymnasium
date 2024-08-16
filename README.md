@@ -61,6 +61,11 @@ Info on how to set up the config files for atari games can be found in the READM
 
 ## HyperNEAT and ES-HyperNEAT
 
+IMPORTANT
+
+Running gymnasium games is currently untested with HyperNEAT and ES-HyperNEAT, and may not work.
+
+
 NEAT-Gym supports [HyperNEAT](https://en.wikipedia.org/wiki/HyperNEAT) via the ```--hyper``` option and
 and [ES-HyperNEAT](http://eplex.cs.ucf.edu/ESHyperNEAT/) via the <br> ```--eshyper``` option.
 
@@ -74,6 +79,10 @@ ES-HyperNEAT, the hidden coordinates should be ```None```.
 
 
 ## Novelty Search
+
+IMPORTANT
+
+Running gymnasium games is currently untested with Novelty Search, and may not work.
 
 NEAT-Gym supports
 [Novelty Search](https://www.cs.swarthmore.edu/~meeden/DevelopmentalRobotics/lehman_ecj11.pdf)
@@ -92,7 +101,7 @@ The
 module exports two functions:
 
 * [read_file](https://github.com/simondlevy/neat-gym/blob/master/neat_gym/__init__.py#L85-L106) loads a .dat file 
-from command-line arguments, returning the evolved network and the name of the envrionment used to evovle it
+from command-line arguments, returning the evolved network and the name of the environment used to evolve it
 (as well as flags for recording a move and suppressing the display).
 
 * [eval_net](https://github.com/simondlevy/neat-gym/blob/master/neat_gym/__init__.py#L109-L131)
