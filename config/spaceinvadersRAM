@@ -6,11 +6,11 @@
 
 [NEAT]
 fitness_criterion      = max
-fitness_threshold      = 1000
-pop_size               = 16
+fitness_threshold      = 2000
+pop_size               = 80
 reset_on_extinction    = False
 no_fitness_termination = False
-generations            = 100
+generations            = 500
 
 [Gym]
 environment = SpaceInvaders-ramNoFrameskip-v4
@@ -36,9 +36,9 @@ activation            = sigmoid
 
 [DefaultGenome]
 # node activation options
-activation_default      = tanh
+activation_default      = relu
 activation_mutate_rate  = 0.5
-activation_options      = gauss sin tanh
+activation_options      = sigmoid relu
 
 # node aggregation options
 aggregation_default     = sum
@@ -66,8 +66,8 @@ conn_delete_prob        = 0.5
 enabled_default         = True
 enabled_mutate_rate     = 0.01
 
-feed_forward            = True
-initial_connection      = full
+feed_forward            = False
+initial_connection      = unconnected
 
 # node add/remove rates
 node_add_prob           = 0.2
@@ -103,7 +103,7 @@ max_stagnation       = 20
 species_elitism      = 5
 
 [DefaultReproduction]
-elitism            = 5
+elitism            = 0
 survival_threshold = 0.2
 
 [Names]

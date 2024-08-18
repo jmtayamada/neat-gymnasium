@@ -82,7 +82,7 @@ class _GymNeatConfig(object):
                         continue
                     if self.rendType == "screen":
                         for i in range(int(name)):
-                            self.node_names[-i-1] = "pixel"
+                            self.node_names[-i-1] = str("pixel" + str(i))
                         break
                     if name == "SCREENINPUT":
                         self.rendType = "screen"
