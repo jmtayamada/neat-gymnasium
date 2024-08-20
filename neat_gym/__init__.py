@@ -55,6 +55,7 @@ def read_file(allow_record=False, allow_seed=False):
 
     parser.add_argument('--nodisplay', dest='nodisplay', action='store_true',
                         help='Suppress display')
+    parser.add_argument('--greyscale', action='store_true', help='See README')
     if allow_record:
         parser.add_argument('--record', default=None,
                             help='If specified, sets the recording dir')
@@ -77,7 +78,8 @@ def read_file(allow_record=False, allow_seed=False):
             args.record if allow_record else None,
             args.seed if allow_seed else None,
             args.nodisplay,
-            args.csvfilename)
+            args.csvfilename,
+            args.greyscale)
 
 
 def eval_net(
