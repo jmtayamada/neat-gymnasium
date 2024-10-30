@@ -16,13 +16,29 @@ import numpy as np
 
 from neat.nn import FeedForwardNetwork
 
+import importlib
 
-def _gym_make(envname):
+
+def _gym_make(envname, wrappers: list[str] = []) -> gym.Env:
 
     env = None
 
     try:
         env = gym.make(envname)
+        for wrapper in wrappers:
+            wordList = wrapper.split(".")
+            wrapperName = wordList.pop()
+            
+            baseModule = ""
+            for word in wordList:
+                if baseModule != "":
+                    baseModule += "." + word
+                else:
+                    baseModule += word
+            
+            module = importlib.import_module(baseModule)
+            wrapper_class = getattr(module, wrapperName)
+            env = wrapper_class(env)
 
     except Exception as e:
         print('Unable to make environment %s: %s' %
@@ -55,7 +71,6 @@ def read_file(allow_record=False, allow_seed=False):
 
     parser.add_argument('--nodisplay', dest='nodisplay', action='store_true',
                         help='Suppress display')
-    parser.add_argument('--greyscale', action='store_true', help='See README')
     if allow_record:
         parser.add_argument('--record', default=None,
                             help='If specified, sets the recording dir')
@@ -78,8 +93,7 @@ def read_file(allow_record=False, allow_seed=False):
             args.record if allow_record else None,
             args.seed if allow_seed else None,
             args.nodisplay,
-            args.csvfilename,
-            args.greyscale)
+            args.csvfilename,)
 
 
 def eval_net(
@@ -105,10 +119,7 @@ def eval_net(
     @return total reward
     '''
     
-    greyscale: bool = False
     for key, value in kwargs.items():
-        if key == 'greyscale':
-            greyscale = value
         if key == 'rendType':
             rendType = value
 
@@ -117,8 +128,6 @@ def eval_net(
 
     # env.seed(seed)
     state, _ = env.reset()
-    if greyscale:
-        state = state[:, :, 0]
     state = state.flatten()
     total_reward = 0
     steps = 0
@@ -142,8 +151,6 @@ def eval_net(
                   if is_discrete else action * env.action_space.high)
 
         state, reward, terminated, truncated, _ = env.step(action)
-        if greyscale:
-            state = state[:, :, 0]
         state = state.flatten()
 
         if csvfile is not None:

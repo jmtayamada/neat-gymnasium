@@ -107,6 +107,6 @@ elitism            = 5
 survival_threshold = 0.2
 
 [Names]
-wrappers = []
-input  = ['SCREENINPUT', '33600']
+wrappers = ["gymnasium.wrappers.GrayScaleObservation"]
+input  = ["SCREENINPUT", 33600]
 output = ['NOOP', 'FIRE', 'RIGHT', 'LEFT', 'RIGHTFIRE', 'LEFTFIRE']

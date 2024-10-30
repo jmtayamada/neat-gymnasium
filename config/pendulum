@@ -108,5 +108,6 @@ elitism            = 10
 survival_threshold = 0.2
 
 [Names]
+wrappers = []
 input  = ['cos', 'sin', 'dot']
 output = ['torque']

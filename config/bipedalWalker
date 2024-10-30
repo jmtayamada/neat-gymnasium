@@ -107,5 +107,7 @@ elitism            = 0
 survival_threshold = 0.2
 
 [Names]
+wrappers = []
+
 input  = ['hull angle speed', 'angular velocity', 'horizontal speed', 'vertical speed', 'jointPos', 'jointPos', 'jointPos', 'jointPos', 'jointSpeed', 'jointSpeed', 'jointSpeed', 'jointSpeed', 'legContact', 'legContact', 'SCREENINPUT', '10']
 output = ['MOTOR1', 'MOTOR2', 'MOTOR3', 'MOTOR4']

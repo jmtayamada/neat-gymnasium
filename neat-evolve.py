@@ -36,6 +36,8 @@ from pureples.shared.substrate import Substrate
 from neat_gym import _gym_make, _is_discrete, eval_net
 from neat_gym.novelty import Novelty
 
+from math import prod
+
 
 class _GymNeatConfig(object):
     '''
@@ -62,8 +64,9 @@ class _GymNeatConfig(object):
         self.species_set_type = neat.DefaultSpeciesSet
         self.stagnation_type = neat.DefaultStagnation
         
-        self.greyscale = False
         self.rendType = "simple"
+        
+        wrappers = []
 
         parameters = ConfigParser()
         with open(args.configfile) as f:
@@ -76,24 +79,28 @@ class _GymNeatConfig(object):
 
             try:
                 names = parameters['Names']
+                
+                for idx, name in enumerate(eval(names['wrappers'])):
+                    wrappers.append(name)
+                
                 for idx, name in enumerate(eval(names['input'])):
-                    if name == "GREYSCALE":
-                        self.greyscale = True
-                        continue
+                    # if name == "DEFAULT":
+                    #     self.rendType = "default"
+                    #     break
                     if self.rendType == "screen":
                         for i in range(int(name)):
                             self.node_names[-i-1] = str("pixel" + str(i))
                         break
-                    if name == "SCREENINPUT":
+                    elif name == "SCREENINPUT":
                         self.rendType = "screen"
-                    if self.rendType == "simple":
+                    else:
                         self.node_names[-idx-1] = name
                     
                 for idx, name in enumerate(eval(names['output'])):
                     self.node_names[idx] = name
             except Exception:
                 pass
-
+        
         param_list_names = []
 
         for p in self.__params:
@@ -116,9 +123,9 @@ class _GymNeatConfig(object):
         gympar = parameters['Gym']
         env_name = gympar['environment']
         self.reps = int(gympar['episode_reps'])
-
+        
         # Make gym environment form name in command-line arguments
-        env: gym.Env = _gym_make(env_name)
+        env: gym.Env = _gym_make(env_name, wrappers)
 
         # Get input/output layout from environment, or from layout for Hyper
         if layout is None:
@@ -126,12 +133,8 @@ class _GymNeatConfig(object):
             if self.rendType == "simple":
                 num_inputs = env.observation_space.shape[0]
             elif self.rendType == "screen":
-                if self.greyscale:
-                    for i in range(len(env.observation_space.shape) - 1):
-                        num_inputs = num_inputs * env.observation_space.shape[i]
-                else:
-                    for i in range(len(env.observation_space.shape)):
-                        num_inputs = num_inputs * env.observation_space.shape[i]
+                for i in range(len(env.observation_space.shape)):
+                    num_inputs = num_inputs * env.observation_space.shape[i]
             if _is_discrete(env):
                 num_outputs = env.action_space.n
             else:
@@ -218,7 +221,6 @@ class _GymNeatConfig(object):
                                      activations=self.activations,
                                      seed=self.seed,
                                      max_episode_steps=self.max_episode_steps,
-                                     greyscale = self.greyscale,
                                      rendType = self.rendType)
 
             reward_sum += reward
@@ -251,8 +253,6 @@ class _GymNeatConfig(object):
         env: gym.Env = self.env
         # env.seed(self.seed)
         state, _ = env.reset()
-        if self.greyscale:
-            state = state[:, :, 0]
         state = state.flatten()
         steps = 0
 
@@ -272,8 +272,6 @@ class _GymNeatConfig(object):
                       else action * env.action_space.high)
 
             state, reward, terminated, truncated, info = env.step(action)
-            if self.greyscale:
-                state = state[:, :, 0]
             state = state.flatten()
 
             behavior = info['behavior']

@@ -107,5 +107,6 @@ elitism            = 0
 survival_threshold = 0.2
 
 [Names]
+wrappers = []
 input  = ['SCREENINPUT', '128']
 output = ['NOOP', 'FIRE', 'RIGHT', 'LEFT', 'RIGHTFIRE', 'LEFTFIRE']
